@@ -11,20 +11,16 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
-	"io/ioutil"
-	"log"
 	"net"
 	"net/http"
 	"net/http/httptest"
 	"net/textproto"
-	"os"
 	"strconv"
 	"strings"
 	"testing"
 	"time"
 
-	"github.com/golang/protobuf/proto"
-	google_protobuf "github.com/golang/protobuf/ptypes/empty"
+	grpc_logsettable "github.com/grpc-ecosystem/go-grpc-middleware/logging/settable"
 	"github.com/improbable-eng/grpc-web/go/grpcweb"
 	testproto "github.com/improbable-eng/grpc-web/integration_test/go/_proto/improbable/grpcweb/test"
 	"github.com/mwitkow/go-conntrack/connhelpers"
@@ -38,6 +34,8 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/grpclog"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/protobuf/proto"
+	google_protobuf "google.golang.org/protobuf/types/known/emptypb"
 )
 
 var (
@@ -92,7 +90,7 @@ func (s *GrpcWebWrapperTestSuite) SetupTest() {
 	var err error
 	s.grpcServer = grpc.NewServer()
 	testproto.RegisterTestServiceServer(s.grpcServer, &testServiceImpl{})
-	grpclog.SetLogger(log.New(os.Stderr, "grpc: ", log.LstdFlags))
+	grpclog.SetLoggerV2(grpc_logsettable.ReplaceGrpcLoggerV2())
 	s.wrappedServer = grpcweb.WrapServer(s.grpcServer)
 
 	httpServer := http.Server{
@@ -208,7 +206,7 @@ func (s *GrpcWebWrapperTestSuite) makeGrpcRequest(
 		return nil, grpcweb.Trailer{}, nil, err
 	}
 	defer resp.Body.Close()
-	contents, err := ioutil.ReadAll(resp.Body)
+	contents, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, grpcweb.Trailer{}, nil, err
 	}
@@ -332,7 +330,7 @@ func (s *GrpcWebWrapperTestSuite) TestPingList() {
 }
 
 func (s *GrpcWebWrapperTestSuite) getStandardGrpcClient() *grpc.ClientConn {
-	conn, err := grpc.Dial(s.listener.Addr().String(),
+	conn, err := grpc.NewClient(s.listener.Addr().String(),
 		grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{InsecureSkipVerify: true})),
 		grpc.WithBlock(),
 		grpc.WithTimeout(100*time.Millisecond),

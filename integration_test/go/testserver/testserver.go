@@ -5,12 +5,10 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
-	"os"
 	"sync"
 
-	google_protobuf "github.com/golang/protobuf/ptypes/empty"
+	grpc_logsettable "github.com/grpc-ecosystem/go-grpc-middleware/logging/settable"
 	"github.com/improbable-eng/grpc-web/go/grpcweb"
 	testproto "github.com/improbable-eng/grpc-web/integration_test/go/_proto/improbable/grpcweb/test"
 	"golang.org/x/net/context"
@@ -19,6 +17,7 @@ import (
 	"google.golang.org/grpc/grpclog"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
+	google_protobuf "google.golang.org/protobuf/types/known/emptypb"
 )
 
 var (
@@ -40,7 +39,7 @@ func main() {
 	}
 	testproto.RegisterTestServiceServer(grpcServer, testServer)
 	testproto.RegisterTestUtilServiceServer(grpcServer, testServer)
-	grpclog.SetLogger(log.New(os.Stdout, "testserver: ", log.LstdFlags))
+	grpclog.SetLoggerV2(grpc_logsettable.ReplaceGrpcLoggerV2())
 
 	websocketOriginFunc := grpcweb.WithWebsocketOriginFunc(func(req *http.Request) bool {
 		return true
@@ -93,7 +92,7 @@ func main() {
 		Handler: http.HandlerFunc(emptyHandler),
 	}
 
-	grpclog.Printf("Starting servers. http1.1 port: %d, http1.1 empty port: %d, http2 port: %d, http2 empty port: %d", *http1Port, *http1EmptyPort, *http2Port, *http2EmptyPort)
+	grpclog.Infof("Starting servers. http1.1 port: %d, http1.1 empty port: %d, http2 port: %d, http2 empty port: %d", *http1Port, *http1EmptyPort, *http2Port, *http2EmptyPort)
 
 	// Start the empty Http1.1 server
 	go func() {

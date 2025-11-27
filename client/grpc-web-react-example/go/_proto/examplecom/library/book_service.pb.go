@@ -6,8 +6,8 @@ package examplecom_library
 import (
 	context "context"
 	fmt "fmt"
-	proto "github.com/golang/protobuf/proto"
 	grpc "google.golang.org/grpc"
+	proto "google.golang.org/protobuf/proto"
 	math "math"
 )
 
