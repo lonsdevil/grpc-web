@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"fmt"
 	"log"
 	"net"
@@ -11,8 +12,6 @@ import (
 	"time"
 
 	"nhooyr.io/websocket"
-
-	"crypto/tls"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_logrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
@@ -209,7 +208,7 @@ func buildGrpcProxyServer(backendConn *grpc.ClientConn, logger *logrus.Entry) *g
 	grpc_logrus.ReplaceGrpcLogger(logger)
 
 	// gRPC proxy logic.
-	director := func(ctx context.Context, fullMethodName string) (context.Context, *grpc.ClientConn, error) {
+	director := func(ctx context.Context, fullMethodName string) (context.Context, grpc.ClientConnInterface, error) {
 		md, _ := metadata.FromIncomingContext(ctx)
 		outCtx, _ := context.WithCancel(ctx)
 		mdCopy := md.Copy()

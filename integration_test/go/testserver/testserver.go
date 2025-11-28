@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"sync"
 
-	grpc_logsettable "github.com/grpc-ecosystem/go-grpc-middleware/logging/settable"
 	"github.com/improbable-eng/grpc-web/go/grpcweb"
 	testproto "github.com/improbable-eng/grpc-web/integration_test/go/_proto/improbable/grpcweb/test"
 	"golang.org/x/net/context"
@@ -39,7 +38,7 @@ func main() {
 	}
 	testproto.RegisterTestServiceServer(grpcServer, testServer)
 	testproto.RegisterTestUtilServiceServer(grpcServer, testServer)
-	grpclog.SetLoggerV2(grpc_logsettable.ReplaceGrpcLoggerV2())
+	//grpclog.SetLoggerV2(grpc_logsettable.ReplaceGrpcLoggerV2())
 
 	websocketOriginFunc := grpcweb.WithWebsocketOriginFunc(func(req *http.Request) bool {
 		return true

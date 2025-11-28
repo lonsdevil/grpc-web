@@ -20,7 +20,6 @@ import (
 	"testing"
 	"time"
 
-	grpc_logsettable "github.com/grpc-ecosystem/go-grpc-middleware/logging/settable"
 	"github.com/improbable-eng/grpc-web/go/grpcweb"
 	testproto "github.com/improbable-eng/grpc-web/integration_test/go/_proto/improbable/grpcweb/test"
 	"github.com/mwitkow/go-conntrack/connhelpers"
@@ -90,7 +89,8 @@ func (s *GrpcWebWrapperTestSuite) SetupTest() {
 	var err error
 	s.grpcServer = grpc.NewServer()
 	testproto.RegisterTestServiceServer(s.grpcServer, &testServiceImpl{})
-	grpclog.SetLoggerV2(grpc_logsettable.ReplaceGrpcLoggerV2())
+	//grpclog.SetLoggerV2(grpc_logsettable.ReplaceGrpcLoggerV2())
+
 	s.wrappedServer = grpcweb.WrapServer(s.grpcServer)
 
 	httpServer := http.Server{
